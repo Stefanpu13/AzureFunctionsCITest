@@ -16,7 +16,7 @@ type Log (level) =
 
 let Run(myTimer: TimerInfo, log: TraceWriter) =
     log.Info(
-        sprintf "F# Timer trigger function executed at: %s" 
+        sprintf "F# Timer trigger function executed at: %s edited" 
             (DateTime.Now.ToString()))
 
 
