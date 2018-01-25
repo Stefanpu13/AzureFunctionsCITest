@@ -2,27 +2,28 @@
 open System
 #I @"C:/Users/stefan.uzunov.SCALEFOCUS/AppData/Roaming/nvm/v8.7.0/node_modules/azure-functions-core-tools/bin/"
 #I @"C:/Users/stefan.uzunov.SCALEFOCUS/.nuget/packages/fsharp.data/2.4.4/lib/net45/"
-// #I @"C:/Users/stefan.uzunov.SCALEFOCUS/.nuget/packages/sqlprovider/1.1.28/lib/netstandard2.0/"
-#I @"C:/Users/stefan.uzunov.SCALEFOCUS/.nuget/packages/sqlprovider/1.1.28/lib/net451/"
 
+#I @"C:\Users\stefan.uzunov.SCALEFOCUS\.nuget\packages\fsharp.data.typeproviders\5.0.0.2\lib\net40"
 #r "Microsoft.Azure.Webjobs.Host.dll" // Tracer
 #r "Microsoft.Azure.WebJobs.Extensions.dll" // timer
+
 #r "FSharp.Data.dll"
 #r "FSharp.Data.DesignTime.dll"
-#r "FSharp.Data.SqlProvider.dll"
-#r "netstandard.dll"
-#r "System.Console.dll"
-#r "System.Data.SqlClient.dll"
-#r "System.IO.dll"
-#r "System.Reflection.dll"
-#r "System.Runtime.dll"
+
+#r "FSharp.Data.TypeProviders.dll"
+
 
 open Microsoft.Azure.WebJobs.Host
 open Microsoft.Azure.WebJobs
 #endif
 
+// #r "System.Data.Linq.dll"
+
 open FSharp.Data
-open FSharp.Data.Sql
+// open System.Data
+// open System.Data.Linq
+// open FSharp.Data.TypeProviders
+
 
 
 [<Literal>]    
@@ -36,23 +37,16 @@ let AzureConnectionString = @"
     Connection Timeout=30;
 "
 
-type SQL = 
-    SqlDataProvider< 
-        ConnectionString = AzureConnectionString,
-        DatabaseVendor = Common.DatabaseProviderTypes.MSSQLSERVER,
-        UseOptionTypes = true
-    >
+// type SQL = SqlDataConnection<AzureConnectionString>
 
-let ctx = SQL.GetDataContext()
+// let ctx = SQL.GetDataContext()
 
 // ctx.
-let readFromAzureDb () =    
-    ctx.Dbo.Pairs
-    |> Seq.take 10
-    |> Seq.toArray 
-    |> Seq.map (fun p -> p.Exchange)
-
-
+// let readFromAzureDb () =    
+//     ctx.Pairs 
+//     |> Seq.take 2
+//     |> Seq.toArray 
+//     |> Seq.map (fun p -> p.Exchange)
 
 type Log (level) =
     inherit TraceWriter(level:System.Diagnostics.TraceLevel)
@@ -74,13 +68,12 @@ let Run(myTimer: TimerInfo, log: TraceWriter) =
     let topExchange  = getTop25Exchanges() |> Seq.item 0 
 
     log.Info(
-        sprintf "Top exchange: %s" topExchange            
+        sprintf "Top exchange: %s" topExchange           
         )
     
-    readFromAzureDb () 
-    |> Seq.map (fun exch -> sprintf "Top exchange: %s" exch)
-    |> Seq.reduce (+)
-    |> log.Info
-    
+    // readFromAzureDb () 
+    // |> Seq.map (fun exch -> sprintf "Top exchange: %s" exch)
+    // |> Seq.reduce (+)
+    // |> log.Info    
 
 // Run (null, Log())

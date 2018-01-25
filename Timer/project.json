@@ -1,9 +1,9 @@
 {
     "frameworks": {
        "net46":{
-         "dependencies": {
+         "dependencies": {           
            "FSharp.Data": "2.4.4",
-           "SQLProvider":"1.1.28"
+           "FSharp.Data.TypeProviders": "5.0.0.2"
         }
       }
     }
