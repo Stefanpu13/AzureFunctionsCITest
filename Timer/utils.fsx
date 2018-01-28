@@ -24,8 +24,3 @@ let (|ValidPrice|ExcludedPrice|InvalidPrice|) (price: string) =
 
 let join l separator : string = 
     Seq.reduce (fun r el -> r + separator + el) l
-
-// match "$0.798179"  with
-// | ValidPrice v -> v,0
-// | ExcludedPrice v -> v, 1
-// |InvalidPrice-> 0.M,2

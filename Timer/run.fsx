@@ -18,12 +18,9 @@ open Microsoft.Azure.WebJobs
 #load "parsers.fsx"
 #load "DBWriter.fsx"
 
-
 open Parsers 
 open DBWriter
 
-
-// [<Literal>]    
 let AzureConnectionString = @"
     Server=tcp:cryptospu.database.windows.net,1433;
     Initial Catalog=Crypto;Persist Security Info=False;

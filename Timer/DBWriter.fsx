@@ -30,10 +30,6 @@ module DB =
     Connection Timeout=30;
     "
 
-    // let insertPairCmd = @"
-    // INSERT INTO dbo.Pairs (Date, PriceUSD, Exchange,Code, Volume)
-    // VALUES (@Date, @PriceUSD, @Exchange, @Code, @Volume)
-    // "
     let insertPairCmd = @"
     INSERT INTO dbo.Pairs (Date, PriceUSD, Exchange,Code, Volume)
     "
