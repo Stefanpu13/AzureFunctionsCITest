@@ -3,7 +3,7 @@
        "net46":{
          "dependencies": {           
            "FSharp.Data": "2.4.4",
-           "FSharp.Data.TypeProviders": "5.0.0.2"
+           "Dapper": "1.50.4"          
         }
       }
     }
