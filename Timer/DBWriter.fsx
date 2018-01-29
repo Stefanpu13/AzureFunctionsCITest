@@ -41,7 +41,7 @@ module DB =
         "(" + 
         (
             join [
-                singleQoutes (p.Date.ToString("yyyy-MM-dd hh:mm:ss"))
+                singleQoutes (p.Date.ToString("yyyy-MM-dd HH:mm:ss"))
                 p.PriceUSD.ToString()
                 singleQoutes p.Exchange
                 singleQoutes p.Code
