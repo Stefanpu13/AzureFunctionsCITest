@@ -1,9 +1,8 @@
-open System.Data.SqlClient
-open System.Data
-open System
+#I @"C:\Users\stefan.uzunov.SCALEFOCUS\.nuget\packages\sqlprovider\1.1.28\lib\net451"
+#r "FSharp.Data.SQLProvider.dll"
+open FSharp.Data.Sql
 
-
-
+[<Literal>]
 let AzureConnectionString = @"
 Server=tcp:cryptospu.database.windows.net,1433;
 Initial Catalog=Crypto;Persist Security Info=False;
@@ -14,56 +13,27 @@ TrustServerCertificate=False;
 Connection Timeout=30;
 "
 
+type sql = SqlDataProvider< 
+              ConnectionString = AzureConnectionString,
+              DatabaseVendor = Common.DatabaseProviderTypes.MSSQLSERVER,              
+              UseOptionTypes = true >
 
-let cn = new SqlConnection(AzureConnectionString)
-cn.Open()
+let ctx = sql.GetDataContext()
 
-let cmd = new SqlCommand("select * from Pairs", cn)
-let reader = cmd.ExecuteReader()
+let allRecords = ctx.Dbo.Pairs |> List.ofSeq
 
-while (reader.Read()) do    
-    let res = reader.[0], reader.[1], reader.[2]
-    res
-
+let groupedByTimeOfRecording = 
+    allRecords
+    |> Seq.sortBy (fun p -> p.Date)
+    |> Seq.groupBy (fun p -> p.Date.ToString("yyyy-MM-dd HH:mm"))
 
 
-#load "parsers.fsx"
+groupedByTimeOfRecording
+|> Seq.map (snd >> Seq.length)
+|> Seq.distinct
+|> Seq.toList
 
-open Parsers
 
-let coinsInExchanges = 
-    CoinMarketCap.coinsPerExchanges (CoinMarketCap.getTop25Exchanges())            
-
-let values =
-    coinsInExchanges
-    |> Seq.map snd
-    |> Seq.collect (fun pairs -> 
-        Seq.map(fun p ->
-            let date ="'" + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss") + "'"
-            let priceUSD= p.pairPrice.price.ToString() 
-            let exchange ="'" + p.exchangeName + "'"
-            let code = "'" + p.baseCurrency.ToLower() + "/" + p.quoteCurrency.ToLower()  + "'"
-            let volume =p.volume.volume.ToString() 
-            // sprintf """(%A, %A, %A, %A, %A)""" date priceUSD exchange code volume 
-            "(" + date + ", " + priceUSD + ", " + exchange + ", " + code + ", " + volume + ")"  
-        ) pairs
-    )
-    |> Seq.windowed 1000
-
-values
-|> Seq.sumBy(fun values -> 
-    let allValuesInBatch = Seq.reduce (fun res v -> res + ", " + v) values
-    // let firstRow = Seq.head values
-    let insertCmd = @"
-        INSERT INTO dbo.Pairs (Date, PriceUSD, Exchange, Code, Volume) 
-        VALUES "
-    
-    let finalCmd = insertCmd + allValuesInBatch
-    let cmd2 = new SqlCommand(finalCmd, cn)
-
-    cmd2.ExecuteNonQuery()
-) 
-    
-values |> Seq.length    
-values |> Seq.head |> Seq.head
-    
+groupedByTimeOfRecording
+|> Seq.map (fun (h, ps) -> h, Seq.length ps)
+|> Seq.toList
