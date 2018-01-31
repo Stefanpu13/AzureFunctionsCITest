@@ -1,5 +1,8 @@
-
+git 
+#load "types.fsx"
 #load "parsers.fsx"
+
+open Types
 open Parsers
 open CoinMarketCap
 open IsThisCoinAScam
