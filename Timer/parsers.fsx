@@ -165,7 +165,7 @@ module IsThisCoinAScam =
 
     let allCoinsProfiles = allCoinsProfilesPage.CssSelect("#example > tbody > tr")
 
-    allCoinsProfiles |> Seq.item 0 |> (fun row ->                 
+    allCoinsProfiles |> Seq.head |> (fun row ->                 
         row.Elements() 
         |> Seq.last 
         |>  (fun td -> td.InnerText())

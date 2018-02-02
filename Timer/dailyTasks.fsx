@@ -13,13 +13,16 @@
             d) What can go wrong:
                 - Price might already be pumped and sell off follows 
                 the listing of the coin on an exchange
-                - The coin might not go up, as the genral market is bearish
+                - The coin might not go up, as the general market is bearish
                 (This is also a good thing - opportunity to buy at low price?)
                 -Volativity might be big and in two directions
             e) What data to look for:            
                 - Which is the pair
                 - Which is the exchange and which is it position 
-                - Are there are exchanges
+                    * is it a top 10 by volume exchange - more potensial buyers
+                    * does it have small number of pairs - more likely ro have
+                    serious scrutiny rules                    
+                    * Are there are multiple exchanges
         2. A pair is removed from exchange
             a) Reasoning: Number of reasons, most of them very negative:
                 - Pair is forbidden from regulations (its a scam, ponzy, etc)
@@ -38,7 +41,7 @@
                 If overinvested I can have a huge loss
                 - Negative effect to other currencies (including mine) 
                 might be immediate                
-                (For example, regulators say: ICO is scamand must be removed, 
+                (For example, regulators say: ICO is scam and must be removed, 
                 other removals might follow)
                 - Exchange can have problems with solvency(This assumes that
                 exchange pays customers with its money):
@@ -47,6 +50,16 @@
                     people holding other currencies try to cash in, but there is not
                     enough money
                      )
+                - regulator bans the currency or, a class of currencies - that leads to
+                huge sell pressure
+            e) What data to look for: 
+                - Pair
+                    * Which is it
+                    * Is a pair in top 100 by volume
+
+                - Exchange
+                    * Which is it
+                    * Are there others
 
         3. A pair is excluded on "coinmarketcap"
 *)
@@ -59,8 +72,10 @@ open System
 [<Literal>]
 let AzureConnectionString = @"
 Server=tcp:cryptospu.database.windows.net,1433;
-Initial Catalog=Crypto;Persist Security Info=False;
-User ID=crypto_db;Password=Stefan@2;
+Initial Catalog=Crypto;
+Persist Security Info=False;
+User ID=crypto_db;
+Password=Stefan@2;
 MultipleActiveResultSets=False;
 Encrypt=True;
 TrustServerCertificate=False;
@@ -76,8 +91,6 @@ type Sql = SqlDataProvider<
 let ctx = Sql.GetDataContext()
 
 // #time
-
-// let allRecords = ctx.Dbo.Pairs |> List.ofSeq
 
 let toExchangeAndCode (pairs: seq<Sql.dataContext.``dbo.PairsEntity``>) = 
     pairs
@@ -122,21 +135,22 @@ let getPairsForHour = stripMinutesAndHours >> getPairsForHourOfDay
 
 let atBeginningOfHour (pairs: seq<Sql.dataContext.``dbo.PairsEntity``>) =
     pairs
-    |> Seq.filter (fun p -> p.Date.Minute = 0)
+    // Note: records are not always done at 0, 20, 40 min
+    |> Seq.filter (fun p -> p.Date.Minute < 20)
 
 
-let getPairs = 
+let getPairsExchangeAndCode = 
     getPairsForHour 
     >> atBeginningOfHour 
     >> toExchangeAndCode
 
 let yesterdayPairs = 
     DateTime.UtcNow.AddDays(-1.0)
-    |> getPairs
+    |> getPairsExchangeAndCode
 
 let latestPairs = 
     DateTime.UtcNow
-    |> getPairs
+    |> getPairsExchangeAndCode
 
 let addedPairs = 
     Set.difference latestPairs yesterdayPairs
@@ -149,12 +163,23 @@ let removedPairs =
 
 let lastHourPairs = 
     DateTime.UtcNow.AddHours(-1.0)
-    |> getPairs
+    |> getPairsExchangeAndCode
 
-let a =     
-    Set.difference latestPairs lastHourPairs
-    |> toPairsPerExchange
+Set.difference latestPairs lastHourPairs
+|> toPairsPerExchange
 
-let r =     
-    Set.difference lastHourPairs latestPairs
-    |> toPairsPerExchange
+Set.difference lastHourPairs latestPairs
+|> toPairsPerExchange
+
+
+Set.difference latestPairs yesterdayPairs
+|> toPairsPerExchange
+
+Set.difference yesterdayPairs latestPairs
+|> toPairsPerExchange
+// |> Seq.find (fun (e, _) -> e = "gate-io")
+// |> snd
+// |> List.length
+
+latestPairs 
+|> Set.filter(fun (e, _ )-> e ="gate-io")

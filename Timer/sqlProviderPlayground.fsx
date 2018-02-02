@@ -20,20 +20,28 @@ type sql = SqlDataProvider<
 
 let ctx = sql.GetDataContext()
 
+// #time
 let allRecords = ctx.Dbo.Pairs |> List.ofSeq
 
 let groupedByTimeOfRecording = 
-    allRecords
-    |> Seq.sortBy (fun p -> p.Date)
-    |> Seq.groupBy (fun p -> p.Date.ToString("yyyy-MM-dd HH:mm"))
+    allRecords    
+    |> Seq.groupBy (fun p -> p.Date)    
 
 
-groupedByTimeOfRecording
+groupedByTimeOfRecording 
+|> Seq.sortBy fst
 |> Seq.map (snd >> Seq.length)
 |> Seq.distinct
 |> Seq.toList
 
 
 groupedByTimeOfRecording
-|> Seq.map (fun (h, ps) -> h, Seq.length ps)
+|> Seq.map (fun (h, ps) -> h.ToString("yyyy-MM-dd HH:mm"), Seq.length ps)
 |> Seq.toList
+
+groupedByTimeOfRecording
+|> Seq.sortByDescending fst
+|> Seq.map (fun (h, ps) -> h.ToString("yyyy-MM-dd HH:mm"), Seq.length ps)
+|> Seq.toList
+
+allRecords |> Seq.length

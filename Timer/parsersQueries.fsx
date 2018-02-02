@@ -1,10 +1,9 @@
-git 
+
 #load "types.fsx"
 #load "parsers.fsx"
 
 open Types
 open Parsers
-open CoinMarketCap
 open IsThisCoinAScam
 
 
@@ -60,3 +59,8 @@ uniqueCoinPairs
 |> Seq.map (fun p -> p.baseCurrency, p.quoteCurrency)
 |> List.ofSeq
 |> Seq.length
+
+CoinMarketCap.coinsInExchange "gate-io" 
+|> snd
+|> Seq.map (fun p -> "gate-io", p.baseCurrency + "/" + p.quoteCurrency)
+|> List.ofSeq
