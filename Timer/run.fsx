@@ -1,4 +1,6 @@
 #if INTERACTIVE
+
+// Scalefocus computer
 #I @"C:/Users/stefan.uzunov.SCALEFOCUS/AppData/Roaming/nvm/v8.7.0/node_modules/azure-functions-core-tools/bin/"
 #I @"C:/Users/stefan.uzunov.SCALEFOCUS/.nuget/packages/fsharp.data/2.4.4/lib/net45/"
 #I @"C:\Users\stefan.uzunov.SCALEFOCUS\.nuget\packages\dapper\1.50.4\lib\net451\"
@@ -59,10 +61,11 @@ let Run(myTimer: TimerInfo, log: TraceWriter) =
     let recordsAffected = 
         measureTime 
             "writing to db" 
-            (fun _ -> DB.writeToAzureDb pairsToWrite) 
+            (fun _ -> DB.writeToAzureDb []) 
             log
     
     log.Info (sprintf "Records Affected: %A" recordsAffected)
+    ()
 
 // Run (null, Log())
 

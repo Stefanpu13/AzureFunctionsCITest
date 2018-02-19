@@ -46,7 +46,7 @@ open Types
 
 
 module CoinMarketCap = 
-    
+    let allCoinsUri = "https://coinmarketcap.com/all/views/all/"
     let exchangesUri = "https://coinmarketcap.com/exchanges/volume/24-hour/all/"
     let mutable exchangesPage = HtmlDocument.Load(exchangesUri)
     let mutable exchangesInfoRows = exchangesPage.CssSelect(".table.table-condensed > tr")    
@@ -55,6 +55,10 @@ module CoinMarketCap =
     let reInit(uri: string) =         
         exchangesPage <- HtmlDocument.Load(uri)
         exchangesInfoRows <- exchangesPage.CssSelect(".table.table-condensed > tr")
+
+    let innerText (children: HtmlNode []) pos = 
+        children.[pos]
+        |> (fun el -> el.InnerText())
 
     let getTop25Exchanges () =             
         exchangesInfoRows
@@ -154,6 +158,93 @@ module CoinMarketCap =
             |> Set.exists(fun c -> c.baseCurrency.ToLower() = coinCode.ToLower())
         )
 
+    let loadAllCoinsPage () = 
+        HtmlDocument.Load(allCoinsUri)
+    let getAllCoinsRows (allCoinsPage: HtmlDocument) = 
+        allCoinsPage.CssSelect(".table.js-summary-table tr")
+    let getCoinRow (row: HtmlNode) = 
+        let children = row.Elements() |> Seq.toArray
+        let childInnerText  = innerText children
+
+        let name = 
+            children.[1]
+            |> (fun td -> 
+                td.Elements()
+                |> Seq.last
+                |> (fun a -> a.InnerText())                 
+            ) 
+        let symbol = childInnerText 2
+        let marketCap = 
+            childInnerText 3
+            |> (fun marketCap -> 
+                match marketCap with
+                | ValidPrice p -> {price=p;excluded=false} 
+                | ExcludedPrice p  -> {price=p;excluded=true} 
+                | InvalidPrice ->  {price=0.M;excluded=false}
+            )
+        let price = 
+            childInnerText 4
+            |> (fun price -> 
+                match price with
+                | ValidPrice p -> {price=p;excluded=false} 
+                | ExcludedPrice p  -> {price=p;excluded=true} 
+                | InvalidPrice ->  {price=0.M;excluded=false}
+            )      
+        let circulatingSupply = 
+            childInnerText 5
+            |> (fun supply -> 
+                match supply with
+                | MinableSupply p -> Minable p 
+                | NotMinableSupply p -> NotMinable p
+                | InvalidSupply ->  UknownSupply
+            )      
+
+        let volume = 
+            childInnerText 6
+            |> (fun volume -> 
+                match volume with
+                | ValidPrice p -> {volume=p;excluded=false} 
+                | ExcludedPrice p  -> {volume=p;excluded=true} 
+                | InvalidPrice ->  {volume=0.M;excluded=false}
+            )                 
+        
+        let hourlyPercentChange = 
+             childInnerText 7
+             |> (fun t -> 
+                match t with
+                | ValidPersentage p -> PercetangeChange p
+                | InvalidPercentage -> UknownPercentage
+             )
+
+        let dailyPercentChange = 
+             childInnerText 8
+             |> (fun t -> 
+                match t with
+                | ValidPersentage p -> PercetangeChange p
+                | InvalidPercentage -> UknownPercentage
+             )
+
+        let weeklyPercentChange = 
+             childInnerText 9
+             |> (fun t -> 
+                match t with
+                | ValidPersentage p -> PercetangeChange p
+                | InvalidPercentage -> UknownPercentage
+             )         
+
+        {
+            name=name
+            symbol=symbol
+            marketCap=marketCap
+            price=price
+            circulatingSupply=circulatingSupply
+            volume=volume
+            hourlyPercentChange=hourlyPercentChange
+            dailyPercentChange=dailyPercentChange
+            weeklyPercentChange=weeklyPercentChange
+        }
+
+
 module IsThisCoinAScam =
     let allCoinsPage = HtmlDocument.Load("https://coinmarketcap.com/all/views/all/")
 
@@ -199,7 +290,7 @@ module IsThisCoinAScam =
                 
             (
                 CoinName coinName, 
-                CoinCode coinSymbol, 
+                CoinSymbol coinSymbol, 
                 CoinVolume (
                     match coinVolume with
                     | ValidUSDPrice p -> p 
@@ -208,12 +299,17 @@ module IsThisCoinAScam =
             )    
         )
 
-    let coinsWithDailyVolumeInInterval low high = 
-        Seq.filter (fun (_,_,CoinVolume v) -> 
-            low <= v && v <= high 
-        ) coinsBasicInfo
+    let biggerThanVolume vol = fun (_,_,CoinVolume v) -> v >= vol 
+    let volumeInInterval low high = 
+        fun (_,_,CoinVolume v) -> low <= v && v <= high  
 
-    let profileCoins profile coins ((_,CoinCode code,_)) =
+    let coinsWithDailyVolumeInInterval low high = 
+        Seq.filter (volumeInInterval low high) coinsBasicInfo
+        
+    let coinsWithBiggerDailyVolume vol = 
+        Seq.filter (biggerThanVolume vol) coinsBasicInfo    
+
+    let profileCoins profile coins ((_,CoinSymbol code,_)) =
         Seq.exists(fun (CodeAndProfile(c:string, pr )) -> 
             c.ToLower() = code.ToLower() && pr >= profile
         ) coins

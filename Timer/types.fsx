@@ -1,10 +1,6 @@
 open System
 
-type Code = string
-
-type Coin = {    
-    code:Code  
-}
+type Symbol = string
 
 type Price = {
     price: decimal
@@ -16,21 +12,37 @@ type Volume = {
     excluded: bool
 }
 
+type PercetangeChange = PercetangeChange of decimal | UknownPercentage
+
+type Supply = Minable of int64 | NotMinable of int64 | UknownSupply
+
+type Coin = {    
+    name: string
+    symbol:Symbol  
+    marketCap:Price
+    price: Price
+    circulatingSupply: Supply
+    volume: Volume
+    hourlyPercentChange: PercetangeChange
+    dailyPercentChange: PercetangeChange
+    weeklyPercentChange: PercetangeChange
+}
+
 type Pair = {
     exchangeName: string
     // the first currency in the pair is called base
-    baseCurrency: Code
-    quoteCurrency: Code
+    baseCurrency: Symbol
+    quoteCurrency: Symbol
     pairPrice: Price
     volume: Volume    
 }
 
 type CoinName = CoinName of string
 
-type CoinCode = CoinCode of string
+type CoinSymbol = CoinSymbol of string
 type CoinVolume = CoinVolume of decimal
 // type
-type BasicInfo = CoinName * CoinCode * CoinVolume
+type BasicInfo = CoinName * CoinSymbol * CoinVolume
 
 type CodeAndProfile = CodeAndProfile of string * int
 

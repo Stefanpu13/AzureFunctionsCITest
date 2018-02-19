@@ -9,11 +9,11 @@ open IsThisCoinAScam
 
 // Take list of high profile coins with daily volume more than 5 000 000
 let highVolumeCoins = 
-    IsThisCoinAScam.coinsWithDailyVolumeInInterval 5000000.M 1000000000000.M
+    IsThisCoinAScam.coinsWithDailyVolumeInInterval 5000000.M 1_000_000_000_000.M
 
 let highVolumeCoinsCodes = 
     highVolumeCoins 
-    |> Seq.map (fun (_, CoinCode c, _) -> c.ToLower())
+    |> Seq.map (fun (_, CoinSymbol c, _) -> c.ToLower())
     |> Set.ofSeq
 
 let highProfileHighVolumeCoins = 
@@ -64,3 +64,58 @@ CoinMarketCap.coinsInExchange "gate-io"
 |> snd
 |> Seq.map (fun p -> "gate-io", p.baseCurrency + "/" + p.quoteCurrency)
 |> List.ofSeq
+
+
+// get list of coins with 50 or more million volume
+let majorCoins = 
+    IsThisCoinAScam.coinsWithBiggerDailyVolume 50_000_000.M
+    |> List.ofSeq
+
+
+// which of the has lost the most the last week
+// which has lost the least the last week
+
+// #time
+
+let allCoinsData = 
+    CoinMarketCap.loadAllCoinsPage ()
+    |> CoinMarketCap.getAllCoinsRows
+    |> Seq.map CoinMarketCap.getCoinRow
+
+
+allCoinsData
+|> Seq.filter(fun c -> 
+    majorCoins
+    |> List.exists (fun (_, CoinSymbol s, _) -> 
+        s.ToLower() = c.symbol.ToLower()
+    )
+)
+|> Seq.sortBy (fun c -> c.weeklyPercentChange)
+|> Seq.map (fun c ->
+    c. name, c. symbol, c.weeklyPercentChange
+)
+|> List.ofSeq
+|> List.iter (fun (n, s, w) -> 
+    let p = 
+        match w with
+        | PercetangeChange p -> float p
+        | UknownPercentage -> 0.0
+
+    printfn "Name: %A;  Symbol: %A; WeeklyChange: %A%%" n s p                
+)
+
+CoinMarketCap.getTopExchangesWithVolume ()
+
+CoinMarketCap.coinsInExchange "upbit"
+|> snd
+|> Seq.filter (fun p -> 
+    List.exists (fun (_, CoinSymbol s, _) -> 
+        p.baseCurrency.ToLower() = s.ToLower()         
+    ) majorCoins
+)
+|> Seq.map (fun p -> p.baseCurrency, p.quoteCurrency)
+|> Seq.toList
+|> List.filter (fun (_, q) ->    
+    q.ToLower() <> "usdt" && 
+    q.ToLower() <> "bnb"
+)

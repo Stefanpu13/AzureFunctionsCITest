@@ -62,6 +62,58 @@
                     * Are there others
 
         3. A pair is excluded on "coinmarketcap"
+            a) Reasoning: 
+                - Something very unusual is happening with the pair. Whether this 
+                is price mismatch across exchanges, or unusual price move, the price
+                is problematic and probably not at its true value
+            b) Expected price behaviour: 
+                - Various behaviours can be occuring when the pair is exluded
+            c) Why is this usefull:
+                - Unusual sircumstances, leading to exclusion,
+                might be signal for both opportunity and danger,
+                But better be regarded as big danger             
+            d) What can go wrong:
+                - Can not exit positions in pair
+                - Collapse in one pair might cause collapse in connected pairs
+                (How are pairs connected? Same family/blockchain, business niche)  
+            e) What data to look for:
+                - Pair            
+                - Exchanges
+                    * If this happens only on single exchange, 
+                    it might be problem specific to the exchange
+        4. Exchange is excluded on "coinmarketcap"
+            a) Reasoning:
+                - Exchange can be excluded due hack, regulatory actions, insolvency,
+                (and probably others)
+            b) Expected price behaviour:
+                - The prices will go down, especially on pairs traded at the exchanges
+            c) Why this is usefull:
+                - Problems with exchange might give clue of something wrong happening
+                inside it          
+            d) What can go wrong: 
+                - My assets in exchange can be stolen/lost
+                - pairs traded in exchange can go down
+            e) What data to look for: 
+                - Which is the exchange            
+        5. A very high range session occurs
+            a) Reasoning:
+                - A high range session can have three extreemes:
+                    * long bearish: 
+                        ** if during bear move - can signal last peoples sales
+                        ** If during bull move - can signal end of bull move
+                    * long bullish:
+                        ** if during bear move - can singal end of bear move
+                        ** if during bull move - can signal forming of a bubble
+                    * long undecided:
+                        ** the trend is uncertain                    
+            b) Expected price behaviour:
+                - A new trend is forming or existing trend is entering final phase
+            c) Why this is usefull:
+                - It can signal change in trend
+            d) What can go wrong:
+                - Since it is a single session, nothing can be certain
+            e) What data to look for: 
+                - High, Low, Open, Close of 1H, 4H, 1D sessions
 *)
 
 #I @"C:\Users\stefan.uzunov.SCALEFOCUS\.nuget\packages\sqlprovider\1.1.28\lib\net451"
@@ -177,9 +229,3 @@ Set.difference latestPairs yesterdayPairs
 
 Set.difference yesterdayPairs latestPairs
 |> toPairsPerExchange
-// |> Seq.find (fun (e, _) -> e = "gate-io")
-// |> snd
-// |> List.length
-
-latestPairs 
-|> Set.filter(fun (e, _ )-> e ="gate-io")
