@@ -16,7 +16,7 @@ Connection Timeout=30;
 type sql = SqlDataProvider< 
               ConnectionString = AzureConnectionString,
               DatabaseVendor = Common.DatabaseProviderTypes.MSSQLSERVER,              
-              UseOptionTypes = true >
+              UseOptionTypes = true>
 
 let ctx = sql.GetDataContext()
 

@@ -64,8 +64,7 @@ let Run(myTimer: TimerInfo, log: TraceWriter) =
             (fun _ -> DB.writeToAzureDb []) 
             log
     
-    log.Info (sprintf "Records Affected: %A" recordsAffected)
-    // ()
+    log.Info (sprintf "Records Affected: %A" recordsAffected)    
 
 // Run (null, Log())
 
