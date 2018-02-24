@@ -28,8 +28,11 @@
                 ** IF prices are for several currencies, 
                 than maybe the exchange has problems
 *)
+
 #if INTERACTIVE
 #I @"C:/Users/stefan.uzunov.SCALEFOCUS/.nuget/packages/fsharp.data/2.4.4/lib/net45/"
+// my pc
+#I @"C:/Users/stefan/.nuget/packages/fsharp.data/2.4.4/lib/net45/"
 
 #r "FSharp.Data.dll"
 #r "FSharp.Data.DesignTime.dll"
@@ -39,9 +42,9 @@ open System
 open FSharp.Data
 
 #load "utils.fsx"
-open Utils
-
 #load "types.fsx"
+
+open Utils
 open Types    
 
 
@@ -110,7 +113,7 @@ module CoinMarketCap =
             |> (fun td -> td.InnerText())
             |> (fun volume -> 
                 match volume with
-                | ValidPrice p -> {volume =p;excluded=false} 
+                | ValidPrice p -> {volume =p;Volume.excluded=false} 
                 | ExcludedPrice p  -> {volume=p;excluded=true} 
                 | InvalidPrice ->  {volume=0.M;excluded=false}
             )

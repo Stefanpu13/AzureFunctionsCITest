@@ -1,6 +1,8 @@
 
 #if INTERACTIVE
 #I @"C:\Users\stefan.uzunov.SCALEFOCUS\.nuget\packages\dapper\1.50.4\lib\net451\"
+//my pc
+#I @"C:\Users\stefan\.nuget\packages\dapper\1.50.4\lib\net451\"
 
 #r "Dapper.dll"
 #endif

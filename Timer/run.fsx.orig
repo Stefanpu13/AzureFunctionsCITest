@@ -69,8 +69,12 @@ let Run(myTimer: TimerInfo, log: TraceWriter) =
             (fun _ -> DB.writeToAzureDb []) 
             log
     
+<<<<<<< Updated upstream
     log.Info (sprintf "Records Affected: %A" recordsAffected)    
+=======
+    log.Info (sprintf "Records Affected: %A" recordsAffected)
     ()
+>>>>>>> Stashed changes
 
 // Run (null, Log())
 

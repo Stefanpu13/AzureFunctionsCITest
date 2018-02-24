@@ -116,7 +116,11 @@
                 - High, Low, Open, Close of 1H, 4H, 1D sessions
 *)
 
+// scalefocus pc
 #I @"C:\Users\stefan.uzunov.SCALEFOCUS\.nuget\packages\sqlprovider\1.1.28\lib\net451"
+
+// my pc
+#I @"C:\Users\stefan\.nuget\packages\SQLProvider\1.1.28\lib\net451"
 #r "FSharp.Data.SQLProvider.dll"
 open FSharp.Data.Sql
 open System
